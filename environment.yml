@@ -1,0 +1,19 @@
+name: recs-mlops
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pandas=2.2.*
+  - numpy=1.26.*
+  - scipy=1.13.*
+  - tqdm
+  - pyyaml
+  - pip:
+      - implicit==0.7.2
+      - lightfm==1.17
+      - mlflow==2.16.0
+      - dvc[ssh,s3]==3.51.1
+      - great-expectations==0.18.12
+      - joblib
+      - pytest

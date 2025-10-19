@@ -1,0 +1,117 @@
+schema: '2.0'
+stages:
+  convert:
+    cmd: python src/etl/convert_ml1m.py
+    deps:
+    - path: data/raw/ml-1m/movies.dat
+      hash: md5
+      md5: ef9fd9ff8d1b33faf73e2122c371e910
+      size: 171308
+    - path: data/raw/ml-1m/ratings.dat
+      hash: md5
+      md5: a89aa3591bc97d6d4e0c89459ff39362
+      size: 24594131
+    - path: src/etl/convert_ml1m.py
+      hash: md5
+      md5: 00e6efb922c0eac4bd4e373a55e30c8e
+      size: 578
+    outs:
+    - path: data/processed/items.csv
+      hash: md5
+      md5: 2229409f562cc1082533830240bfd535
+      size: 165611
+    - path: data/processed/ratings.csv
+      hash: md5
+      md5: 1bcdfa26ed441c8e74d223489a5770cb
+      size: 21593530
+  validate:
+    cmd: python src/etl/ge_profile.py
+    deps:
+    - path: data/processed/ratings.csv
+      hash: md5
+      md5: 1bcdfa26ed441c8e74d223489a5770cb
+      size: 21593530
+    - path: src/etl/ge_profile.py
+      hash: md5
+      md5: a178da53d92a440307df4eb2a5e0227f
+      size: 484
+  split:
+    cmd: python src/etl/split.py
+    deps:
+    - path: data/processed/ratings.csv
+      hash: md5
+      md5: 1bcdfa26ed441c8e74d223489a5770cb
+      size: 21593530
+    - path: src/etl/split.py
+      hash: md5
+      md5: efcf257edfbe1cd81f8dd6f47b2455e1
+      size: 703
+    outs:
+    - path: data/interim/test.csv
+      hash: md5
+      md5: eebed70538fc4e2fa85c02aaf7216106
+      size: 2746106
+    - path: data/interim/train.csv
+      hash: md5
+      md5: 762593cb9172a13c43a13718d4c21138
+      size: 21990597
+    - path: data/interim/val.csv
+      hash: md5
+      md5: 919e5a38d666c493516b417e5f5907af
+      size: 2556008
+  matrix:
+    cmd: python src/etl/build_matrix.py
+    deps:
+    - path: data/interim/test.csv
+      hash: md5
+      md5: eebed70538fc4e2fa85c02aaf7216106
+      size: 2746106
+    - path: data/interim/train.csv
+      hash: md5
+      md5: 762593cb9172a13c43a13718d4c21138
+      size: 21990597
+    - path: data/interim/val.csv
+      hash: md5
+      md5: 919e5a38d666c493516b417e5f5907af
+      size: 2556008
+    - path: src/etl/build_matrix.py
+      hash: md5
+      md5: 5a5f2d2cf7cfcbf9b625d14d74296e12
+      size: 1475
+    outs:
+    - path: artifacts/R_test.npz
+      hash: md5
+      md5: d7a4083d868055f2c94c6da9c64504ad
+      size: 245525
+    - path: artifacts/R_train.npz
+      hash: md5
+      md5: 4b40cab6e150050534a8cbd44bacbf99
+      size: 1535749
+    - path: artifacts/R_val.npz
+      hash: md5
+      md5: 1e102429369b21158c7110221f1b9897
+      size: 236552
+    - path: artifacts/id_maps.joblib
+      hash: md5
+      md5: bedd9aafcd9c185700ec515aba6f932a
+      size: 57289
+  train_als:
+    cmd: python src/train/train_als.py
+    deps:
+    - path: artifacts/R_train.npz
+      hash: md5
+      md5: 4b40cab6e150050534a8cbd44bacbf99
+      size: 1535749
+    - path: artifacts/R_val.npz
+      hash: md5
+      md5: 1e102429369b21158c7110221f1b9897
+      size: 236552
+    - path: src/train/train_als.py
+      hash: md5
+      md5: c6978e614d09c6e294600e995517818b
+      size: 2784
+    outs:
+    - path: artifacts/metrics_val.json
+      hash: md5
+      md5: b653ddb52a6de6b936cb903e2f95b507
+      size: 71

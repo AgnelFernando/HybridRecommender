@@ -1,5 +1,0 @@
-outs:
-- md5: 4b40cab6e150050534a8cbd44bacbf99
-  size: 1535749
-  hash: md5
-  path: R_train.npz

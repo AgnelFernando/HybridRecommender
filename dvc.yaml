@@ -1,0 +1,48 @@
+stages:
+  convert:
+    cmd: python src/etl/convert_ml1m.py
+    deps:
+      - data/raw/ml-1m/ratings.dat
+      - data/raw/ml-1m/movies.dat
+      - src/etl/convert_ml1m.py
+    outs:
+      - data/processed/ratings.csv
+      - data/processed/items.csv
+
+  validate:
+    cmd: python src/etl/ge_profile.py
+    deps:
+      - data/processed/ratings.csv
+      - src/etl/ge_profile.py
+
+  split:
+    cmd: python src/etl/split.py
+    deps:
+      - data/processed/ratings.csv
+      - src/etl/split.py
+    outs:
+      - data/interim/train.csv
+      - data/interim/val.csv
+      - data/interim/test.csv
+
+  matrix:
+    cmd: python src/etl/build_matrix.py
+    deps:
+      - data/interim/train.csv
+      - data/interim/val.csv
+      - data/interim/test.csv
+      - src/etl/build_matrix.py
+    outs:
+      - artifacts/R_train.npz
+      - artifacts/R_val.npz
+      - artifacts/R_test.npz
+      - artifacts/id_maps.joblib
+
+  train_als:
+    cmd: python src/train/train_als.py
+    deps:
+      - artifacts/R_train.npz
+      - artifacts/R_val.npz
+      - src/train/train_als.py
+    outs:
+      - artifacts/metrics_val.json

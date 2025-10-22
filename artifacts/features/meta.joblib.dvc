@@ -1,0 +1,5 @@
+outs:
+- md5: 6725702f34af0c226a5014b0f78d446a
+  size: 52
+  hash: md5
+  path: meta.joblib

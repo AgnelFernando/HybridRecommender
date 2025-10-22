@@ -1,2 +1,6 @@
 [cache]
     type = "hardlink,symlink"
+[core]
+    remote = localstore
+['remote "localstore"']
+    url = ../.dvcstore

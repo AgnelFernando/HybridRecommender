@@ -1,0 +1,11 @@
+name: recs-mlops-mlflow
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pandas
+  - numpy
+  - scipy
+  - pip
+  - pip:
+      - implicit==0.7.2

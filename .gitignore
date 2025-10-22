@@ -1,1 +1,8 @@
 /environment-lock.yml
+.mlflow/
+data/raw/
+gx/uncommitted/
+gx/data_docs/
+__pycache__/
+tests/__pycache__/
+.dvcstore/

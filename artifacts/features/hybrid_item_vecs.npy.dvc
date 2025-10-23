@@ -1,0 +1,5 @@
+outs:
+- md5: 8b4081856df83623b4fe02fa0a0eecde
+  size: 6571392
+  hash: md5
+  path: hybrid_item_vecs.npy

@@ -46,3 +46,31 @@ stages:
       - src/train/train_als.py
     outs:
       - artifacts/metrics_val.json
+
+  features:
+    cmd: python src/features/item_embeddings.py
+    deps:
+      - data/processed/items.csv
+      - src/features/item_embeddings.py
+    outs:
+      - artifacts/features/item_embeddings.npy
+      - artifacts/features/meta.joblib
+
+  hybrid_vecs:
+    cmd: python src/serve/candidate_gen.py
+    deps:
+      - artifacts/models/als/model.joblib
+      - artifacts/features/item_embeddings.npy
+      - src/serve/candidate_gen.py
+    outs:
+      - artifacts/features/hybrid_item_vecs.npy
+
+  train_hybrid:
+    cmd: python src/train/train_hybrid.py
+    deps:
+      - artifacts/features/hybrid_item_vecs.npy
+      - artifacts/R_train.npz
+      - artifacts/R_val.npz
+      - src/train/train_hybrid.py
+    outs:
+      - artifacts/metrics_val_hybrid.json

@@ -115,3 +115,67 @@ stages:
       hash: md5
       md5: b653ddb52a6de6b936cb903e2f95b507
       size: 71
+  features:
+    cmd: python src/features/item_embeddings.py
+    deps:
+    - path: data/processed/items.csv
+      hash: md5
+      md5: 2229409f562cc1082533830240bfd535
+      size: 165611
+    - path: src/features/item_embeddings.py
+      hash: md5
+      md5: b33f233b0a5c742610b9e5056f84658f
+      size: 740
+    outs:
+    - path: artifacts/features/item_embeddings.npy
+      hash: md5
+      md5: db9ee0eb57a020ac37708c77db52ecb9
+      size: 5964416
+    - path: artifacts/features/meta.joblib
+      hash: md5
+      md5: 6725702f34af0c226a5014b0f78d446a
+      size: 52
+  hybrid_vecs:
+    cmd: python src/serve/candidate_gen.py
+    deps:
+    - path: artifacts/features/item_embeddings.npy
+      hash: md5
+      md5: db9ee0eb57a020ac37708c77db52ecb9
+      size: 5964416
+    - path: artifacts/models/als/model.joblib
+      hash: md5
+      md5: 4b2f29b64f0613f11fff66f893a34819
+      size: 2485604
+    - path: src/serve/candidate_gen.py
+      hash: md5
+      md5: 5d07f6a888effbff3fc99d1349c1ac70
+      size: 1067
+    outs:
+    - path: artifacts/features/hybrid_item_vecs.npy
+      hash: md5
+      md5: 8b4081856df83623b4fe02fa0a0eecde
+      size: 6571392
+  train_hybrid:
+    cmd: python src/train/train_hybrid.py
+    deps:
+    - path: artifacts/R_train.npz
+      hash: md5
+      md5: 4b40cab6e150050534a8cbd44bacbf99
+      size: 1535749
+    - path: artifacts/R_val.npz
+      hash: md5
+      md5: 1e102429369b21158c7110221f1b9897
+      size: 236552
+    - path: artifacts/features/hybrid_item_vecs.npy
+      hash: md5
+      md5: 8b4081856df83623b4fe02fa0a0eecde
+      size: 6571392
+    - path: src/train/train_hybrid.py
+      hash: md5
+      md5: 758e8ba0effebc1409fcf1c4e8c8dcbc
+      size: 2853
+    outs:
+    - path: artifacts/metrics_val_hybrid.json
+      hash: md5
+      md5: 5902affcf9704f066a812595bb852668
+      size: 72

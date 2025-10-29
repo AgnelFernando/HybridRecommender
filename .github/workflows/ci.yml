@@ -26,6 +26,11 @@ jobs:
           pip install -r requirements.txt
           pip install fastapi "uvicorn[standard]" redis faiss-cpu pydantic pytest
 
+      - name: Install DVC and pull data
+        run: |
+          pip install dvc[s3]
+          dvc pull
+
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
 

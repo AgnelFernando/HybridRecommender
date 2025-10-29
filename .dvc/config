@@ -1,6 +1,9 @@
 [cache]
     type = "hardlink,symlink"
 [core]
-    remote = localstore
+    remote = s3store
 ['remote "localstore"']
-    url = ../.dvcstore
+    url = /Users/agnela/Projects/HybridRecommender/.dvcstore
+['remote "s3store"']
+    url = s3://hybrid-recommender
+    region = us-east-1

@@ -1,0 +1,16 @@
+.git
+.gitignore
+.mlflow/
+.dvc/cache/
+gx/uncommitted/
+gx/data_docs/
+data/raw/
+notebooks/
+__pycache__/
+*.pyc
+**/.ipynb_checkpoints
+artifacts/**        # prevent huge stuff…
+!artifacts/models/als/model.joblib
+!artifacts/features/hybrid_item_vecs.npy
+data/processed/*    # allow this dir, but…
+!data/processed/items.csv

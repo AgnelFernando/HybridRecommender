@@ -12,8 +12,6 @@ jobs:
       id-token: write
       contents: read
       packages: write
-    env:
-      IMAGE_NAME: ghcr.io/agnelfernando/hybrid-recommender
     steps:
       - uses: actions/checkout@v4
 
@@ -21,11 +19,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: IMAGE_NAME variable
+        run: |
+          echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}/hybrid-recommender" >>${GITHUB_ENV}
+
       - name: Install deps
         run: |
           python -m pip install -U pip
           pip install -r requirements.txt
-          pip install fastapi "uvicorn[standard]" redis faiss-cpu pydantic pytest
         
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@main 

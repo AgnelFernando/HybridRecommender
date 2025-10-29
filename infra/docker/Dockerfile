@@ -9,7 +9,8 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY src /app/src
-COPY artifacts /app/artifacts
+COPY artifacts/models/als/model.joblib /app/artifacts/models/als/model.joblib
+COPY artifacts/features/hybrid_item_vecs.npy /app/artifacts/features/hybrid_item_vecs.npy
 COPY data/processed/items.csv /app/data/processed/items.csv
 
 ENV PORT=8080

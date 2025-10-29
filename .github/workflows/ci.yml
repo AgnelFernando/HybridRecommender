@@ -13,7 +13,7 @@ jobs:
       contents: read
       packages: write
     env:
-      IMAGE_NAME: ghcr.io/${{ github.repository }}/recs-mlops
+      IMAGE_NAME: ghcr.io/${{github.repository_owner,,}}/recs-mlops
     steps:
       - uses: actions/checkout@v4
 

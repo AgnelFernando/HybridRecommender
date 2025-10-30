@@ -22,11 +22,6 @@ jobs:
       - name: IMAGE_NAME variable
         run: |
           echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}/hybrid-recommender" >>${GITHUB_ENV}
-
-      - name: Install deps
-        run: |
-          python -m pip install -U pip
-          pip install -r requirements.txt
         
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@main 
@@ -35,13 +30,17 @@ jobs:
           aws-region: us-east-1
 
       - name: Pull data with DVC
-        run: dvc pull
-
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+        run: |
+          python -m pip install -U pip
+          pip install "dvc[s3]"
+          dvc pull -v
 
       - name: Run tests
-        run: pytest -q
+        run: |
+          pip install -U pip
+          pip install fastapi "uvicorn[standard]" pytest numpy pydantic joblib redis
+          echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+          pytest -q
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -49,15 +48,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/local/lib/android \
-                      /opt/ghc \
-                      /usr/share/dotnet \
-                      /opt/hostedtoolcache
-          docker system prune -af || true
-          sudo rm -rf /var/lib/docker
 
       - name: Build image
         run: |

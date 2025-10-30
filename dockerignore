@@ -9,7 +9,7 @@ notebooks/
 __pycache__/
 *.pyc
 **/.ipynb_checkpoints
-artifacts/**        # prevent huge stuff…
+artifacts/**        
 !artifacts/models/als/model.joblib
 !artifacts/features/hybrid_item_vecs.npy
 data/processed/*    # allow this dir, but…

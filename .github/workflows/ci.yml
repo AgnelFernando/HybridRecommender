@@ -35,11 +35,13 @@ jobs:
           pip install "dvc[s3]"
           dvc pull -v
 
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+
       - name: Run tests
         run: |
           pip install -U pip
           pip install pandas fastapi "uvicorn[standard]" httpx pytest numpy pydantic joblib redis
-          echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
           pytest -q
 
       - name: Log in to GHCR

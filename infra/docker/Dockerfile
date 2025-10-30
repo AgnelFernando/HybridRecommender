@@ -10,8 +10,11 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY src /app/src
 COPY artifacts/models/als/model.joblib /app/artifacts/models/als/model.joblib
+COPY artifacts/id_maps.joblib /app/artifacts/id_maps.joblib
+COPY artifacts/R_train.npz /app/artifacts/R_train.npz
 COPY artifacts/features/hybrid_item_vecs.npy /app/artifacts/features/hybrid_item_vecs.npy
 COPY data/processed/items.csv /app/data/processed/items.csv
+
 
 ENV PORT=8080
 EXPOSE 8080

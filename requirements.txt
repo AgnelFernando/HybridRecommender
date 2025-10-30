@@ -5,3 +5,4 @@ numpy==1.26.*
 pydantic==2.9.2
 joblib
 redis==5.0.8
+implicit==0.7.2

@@ -11,6 +11,8 @@ __pycache__/
 **/.ipynb_checkpoints
 artifacts/**        
 !artifacts/models/als/model.joblib
+!artifacts/id_maps.joblib
 !artifacts/features/hybrid_item_vecs.npy
-data/processed/*    # allow this dir, but…
+!artifacts/R_train.npz
+data/processed/**    
 !data/processed/items.csv

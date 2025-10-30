@@ -38,7 +38,7 @@ jobs:
       - name: Run tests
         run: |
           pip install -U pip
-          pip install pandas fastapi "uvicorn[standard]" pytest numpy pydantic joblib redis
+          pip install pandas fastapi "uvicorn[standard]" httpx pytest numpy pydantic joblib redis
           echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
           pytest -q
 

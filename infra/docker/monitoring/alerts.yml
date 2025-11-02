@@ -1,0 +1,14 @@
+groups:
+- name: api-alerts
+  rules:
+  - alert: HighErrorRate
+    expr: sum(rate(api_requests_total{status_code=~"5.."}[5m])) > 0.1
+    for: 5m
+    labels: { severity: page }
+    annotations: { summary: "High 5xx rate" }
+
+  - alert: HighP95Latency
+    expr: histogram_quantile(0.95, sum(rate(api_request_latency_seconds_bucket{endpoint="/recommendations"}[5m])) by (le)) > 0.25
+    for: 10m
+    labels: { severity: warn }
+    annotations: { summary: "p95 latency > 250ms" }

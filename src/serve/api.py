@@ -1,14 +1,18 @@
 import os
 import json
-import time
 import joblib
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response, BackgroundTasks
 from pydantic import BaseModel, Field
+
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+import time
+from .metrics import REQUEST_COUNT, REQUEST_LATENCY, RECS_GENERATED, CACHE_HIT_RATIO
+from .serving_logger import log_recommendation_event, compact_to_parquet
 
 try:
     import redis
@@ -44,6 +48,22 @@ if USE_FAISS:
     index = faiss.IndexFlatIP(dim)
     norms = np.linalg.norm(ITEM_EMB, axis=1, keepdims=True) + 1e-12
     index.add((ITEM_EMB / norms).astype("float32"))
+
+def get_cache_hit_ratio_from_redis() -> Optional[float]:
+    if not rds:
+        return None
+    try:
+        stats = rds.info("stats")
+        hits = stats.get("keyspace_hits", 0)
+        misses = stats.get("keyspace_misses", 0)
+        total = hits + misses
+        if total == 0:
+            return 0.0
+        ratio = hits / total
+        CACHE_HIT_RATIO.set(ratio)   
+        return ratio
+    except Exception:
+        return None
 
 def _seen_items(uid: int):
     return set(R_TRAIN[uid].indices) if uid < R_TRAIN.shape[0] else set()
@@ -116,20 +136,50 @@ def health():
     return {"status": "ok", "items": int(ITEM_EMB.shape[0])}
 
 @app.post("/recommendations")
-def recommendations(req: RecRequest):
+def recommendations(req: RecRequest, background_tasks: BackgroundTasks):
+    start = time.perf_counter()
+
+    strategy = "hybrid"
     if req.user_id not in uid_map:
-        return {"user_id": req.user_id, "cold_start": True, "items": cold_start(req.topk)}
+        items = cold_start(req.topk)
+        strategy = "coldstart"
+        resp = {"user_id": req.user_id, "cold_start": True, "items": items}
+    else:
+        uid = uid_map[req.user_id]
+        if uid >= ALS.user_factors.shape[0]:
+            items = cold_start(req.topk)
+            strategy = "coldstart"
+            resp = {"user_id": req.user_id, "cold_start": True, "items": items}
+        else:
+            items = recommend_internal(uid, req.topk, req.blend_cf, req.blend_cont)
+            resp = {"user_id": req.user_id, "cold_start": False, "items": items}
 
-    uid = uid_map[req.user_id]
-    if uid >= ALS.user_factors.shape[0]:
-        return {"user_id": req.user_id, "cold_start": True, "items": cold_start(req.topk)}
+    RECS_GENERATED.labels("hybrid" if strategy == "hybrid" else "coldstart").inc()
 
-    items = recommend_internal(uid, req.topk, req.blend_cf, req.blend_cont)
-    return {"user_id": req.user_id, "cold_start": False, "items": items}
+    latency_ms = (time.perf_counter() - start) * 1000.0
+    current_cache_ratio = get_cache_hit_ratio_from_redis()
+
+    background_tasks.add_task(
+        log_recommendation_event,
+        user_id=req.user_id,
+        topk=req.topk,
+        strategy=strategy,
+        cold_start=resp["cold_start"],
+        items=resp["items"],
+        latency_ms=latency_ms,
+        cache_hit_ratio=current_cache_ratio,
+        blend_cf=req.blend_cf,
+        blend_cont=req.blend_cont,
+        extra=None,
+    )
+
+    return resp
+
 
 @app.post("/feedback")
 def feedback(evt: FeedbackEvent):
-    log_dir = Path("logs"); log_dir.mkdir(exist_ok=True)
+    log_dir = Path("logs")
+    log_dir.mkdir(exist_ok=True)
     with open(log_dir / "feedback.log", "a") as f:
         f.write(json.dumps(evt.model_dump()) + "\n")
     if rds:
@@ -150,3 +200,21 @@ def similar_items(item_id: int, topk: int = 10):
     iids = [int(x) for x in I[0] if int(x) != iid][:topk]
     return {"item_id": item_id, "similar": _to_catalog(iids, topk)}
 
+
+@app.middleware("http")
+async def prometheus_middleware(request: Request, call_next):
+    start = time.perf_counter()
+    response: Response = await call_next(request)
+    elapsed = time.perf_counter() - start
+    REQUEST_LATENCY.labels(request.url.path, request.method).observe(elapsed)
+    REQUEST_COUNT.labels(request.url.path, request.method, str(response.status_code)).inc()
+    return response
+
+@app.get("/metrics")
+def metrics():
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+@app.post("/admin/compact-logs")
+def compact_logs(limit_rows: Optional[int] = None):
+    msg = compact_to_parquet(limit_rows=limit_rows)
+    return {"message": msg}

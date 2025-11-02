@@ -6,3 +6,8 @@ gx/data_docs/
 __pycache__/
 tests/__pycache__/
 .dvcstore/
+artifacts/monitoring/drift_report.html
+data/serving_logs.parquet
+logs/feedback.log
+.gitignore
+logs/serving_logs.jsonl

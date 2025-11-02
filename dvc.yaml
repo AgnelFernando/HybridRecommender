@@ -45,6 +45,8 @@ stages:
       - artifacts/R_val.npz
       - src/train/train_als.py
     outs:
+      - artifacts/models/als/model.joblib
+    metrics:
       - artifacts/metrics_val.json
 
   features:
@@ -72,5 +74,5 @@ stages:
       - artifacts/R_train.npz
       - artifacts/R_val.npz
       - src/train/train_hybrid.py
-    outs:
+    metrics:
       - artifacts/metrics_val_hybrid.json

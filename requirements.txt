@@ -6,3 +6,5 @@ pydantic==2.9.2
 joblib
 redis==5.0.8
 implicit==0.7.2
+prometheus-client
+evidently>=0.5.0

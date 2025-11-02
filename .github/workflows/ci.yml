@@ -41,7 +41,7 @@ jobs:
       - name: Run tests
         run: |
           pip install -U pip
-          pip install pandas fastapi "uvicorn[standard]" httpx pytest numpy pydantic joblib redis implicit
+          pip install pandas fastapi "uvicorn[standard]" httpx pytest numpy pydantic joblib redis implicit prometheus-client
           pytest -q
 
       - name: Log in to GHCR
